@@ -223,6 +223,7 @@ public class FinalShooter2Subsystem {
 
     public void periodic() {
         applyPendingPollenAdjust(System.nanoTime());
+        holdHoodAndAdjust();
 
         // read
         v1 = robot.getShooter1Velocity();
@@ -252,6 +253,14 @@ public class FinalShooter2Subsystem {
         }
         robot.shooter1.setPower(power1);
         robot.shooter2.setPower(power2);
+    }
+
+    // sends the mode's hood + adjust values every loop, so FTC Dashboard changes apply live
+    private synchronized void holdHoodAndAdjust() {
+        if (pollenAdjustAtNs != 0) return;   // delayed NECTAR -> POLLEN move still waiting
+        boolean nectar = modeState == MODE.NECTAR;
+        robot.setHood(nectar ? HOOD_NECTAR_POS : HOOD_POLLEN_POS);
+        robot.setAdjust(nectar ? ADJUST_NECTAR_POS : ADJUST_POLLEN_POS);
     }
 
     private static double modeVelocity(MODE mode) {
